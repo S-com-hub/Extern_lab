@@ -1,43 +1,40 @@
-var formidable = require('formidable'),
-    http = require('http'),
-    util = require('util');
+const express = require('express')
 
-http.createServer(function(req, res) {
+const app = express();
+ 
+const zip = require('express-zip');
+ 
+const folderPath = __dirname+'/Files';
 
-  
-
-  if (req.url == '/upload' && req.method.toLowerCase() == 'post') {
-
+app.get('/single',function(req,res) {
+    console.log('single file');
+     
     
+    res.download(folderPath+'/xyz.txt', function(err) {
+        if(err) {
+            console.log(err);
+        }
+    })
+})
+app.get('/multiple', function(req, res) {
+    console.log('Multiple file download')
+ 
+    
+    res.zip([
+           { path: folderPath+'/xyz1.txt',
+               name: 'one.txt'},
+           { path: folderPath+'/xyz2.txt',
+               name: 'two.txt'},
+           { path: folderPath+'/xyz2.txt',
+            name: 'three.txt'}
+    ])
+})
+ 
 
-    var form = new formidable.IncomingForm();
+app.get('/', function(req, res){
+    res.sendFile(__dirname+'/index.html');
+})
 
-    form.parse(req, function(err, fields, files) {
-      if (err) {
-
-        
-
-        console.error(err.message);
-        return;
-      }
-      res.writeHead(200, {'content-type': 'text/plain'});
-      res.write('received upload:\n\n');
-
-      
-
-      res.end(util.inspect({fields: fields, files: files}));
-    });
-    return;
-  }
-
-  
-
-  res.writeHead(200, {'content-type': 'text/html'});
-  res.end(
-    '<form action="/upload" enctype="multipart/form-data" method="post">'+
-    '<input type="text" name="title"><br>'+
-    '<input type="file" name="upload" multiple="multiple"><br>'+
-    '<input type="submit" value="Upload">'+
-    '</form>'
-  );
-}).listen(8080);
+app.listen(3000,function(req,res){
+    console.log('Server started to listen at 3000');
+})
